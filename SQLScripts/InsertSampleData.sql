@@ -426,55 +426,6 @@ VALUES(1,
     (SELECT REF(t) FROM SPORTOBJECT t WHERE t.team_id = 1));
     );
 
-INSERT INTO Player (PLAYER_ID, FIRST_NAME, LAST_NAME, BIRTHDATE, POSITION, TEAM_ID) 
-VALUES (1,
-        'STEPHEN',
-        'CURRY',
-        TO_DATE('03-05-1993', 'DD-MM-YYYY'),
-        'GUARD',
-        (SELECT REF(t) FROM Team t WHERE t.team_id = 1));
-        
-INSERT INTO Player (PLAYER_ID, FIRST_NAME, LAST_NAME, BIRTHDATE, POSITION, TEAM_ID) 
-VALUES (2,
-        'MICHAEL',
-        'JORDAN',
-        TO_DATE('02-03-1983', 'DD-MM-YYYY'),
-        'CENTER',
-        (SELECT REF(t) FROM Team t WHERE t.team_id = 1));
-        
-INSERT INTO Player (PLAYER_ID, FIRST_NAME, LAST_NAME, BIRTHDATE, POSITION, TEAM_ID) 
-VALUES (3,
-        'LEBRON',
-        'JAMES',
-        TO_DATE('10-10-1983', 'DD-MM-YYYY'),
-        'FORWARD',
-        (SELECT REF(t) FROM Team t WHERE t.team_id = 1));
-
-INSERT INTO Player (PLAYER_ID, FIRST_NAME, LAST_NAME, BIRTHDATE, POSITION, TEAM_ID) 
-VALUES (4,
-        'KOBE',
-        'BRYANT',
-        TO_DATE('03-05-1993', 'DD-MM-YYYY'),
-        'FORWARD',
-        (SELECT REF(t) FROM Team t WHERE t.team_id = 1));
-
-INSERT INTO Player (PLAYER_ID, FIRST_NAME, LAST_NAME, BIRTHDATE, POSITION, TEAM_ID) 
-VALUES (5,
-    'NIKOLA',
-    'JOKIC',
-    TO_DATE('10-11-1993', 'DD-MM-YYYY'),
-    'CENTER',
-    (SELECT REF(t) FROM Team t WHERE t.team_id = 1));
-/
-
-INSERT INTO SEASON (SEASON_ID, TEAMS, START_DATE, END_DATE) 
-VALUES (1,
-    TeamListType(
-        TeamType(1, 'Lakers', NULL, NULL),
-        TeamType(2, 'Chicago Bulls', NULL, NULL)),
-    TO_DATE('13-01-2024', 'DD-MM-YYYY'),
-    TO_DATE('13-01-2025', 'DD-MM-YYYY'));
-
 INSERT INTO TEAM (TEAM_ID, NAME, PLAYERS, SPONSORS) 
 VALUES (1,
     'Lakers',
