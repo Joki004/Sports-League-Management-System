@@ -69,8 +69,10 @@ CREATE OR REPLACE TYPE PlayerListType AS TABLE OF PlayerType;
 CREATE OR REPLACE TYPE SponsorListType AS TABLE OF SponsorType;
 
 CREATE TABLE Team OF TeamType
-( PRIMARY KEY (team_id))
-NESTED TABLE sponsors STORE AS sponsors_nt,
+( 
+team_id PRIMARY KEY 
+)
+NESTED TABLE sponsors STORE AS sponsors_nt
 NESTED TABLE players STORE AS players_nt;
 
 CREATE TABLE Player OF PlayerType (
