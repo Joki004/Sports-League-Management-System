@@ -447,6 +447,8 @@ TABLE(s.sponsors) p;
 --DODAÆ SEKTORY I MIEJSCA DO OBIEKTÓW -> KAZDY OBIEKT MA X SEKTORÓW i Y MIEJSC, KA¯DY SEKTOR MA TYLE SAMO MIEJSC
 --JAK DODASZ SEKTORY I MIEJSCA TO PRZERÓBB DODAWANIE OBIEKTÓW SPORTOWYCH - SKRYPT
 
+--PRZY ROBIENIU FUNKCJI - PISZMY OD RAZU BLOK PL/SQL KTÓRY TESTUJE TA FUNKCJE ITD.
+
 --Funkcja generujaca harmonogram
 --Funkcja Dodaj zawodnika -> weryfikacja czy +18
 --Funkcja Sprawdza czy zawodnik nie jest w jakimœ innym teamie
