@@ -1,74 +1,125 @@
--- CreateTableScripts.sql
-
--- Team table
-CREATE TABLE Team (
-  team_id NUMBER PRIMARY KEY,
-  team_name VARCHAR2(50) NOT NULL,
-  team_city VARCHAR2(50),
-  team_captain VARCHAR2(50),
-  founding_year NUMBER,
-  sponsor_id NUMBER,
-  CONSTRAINT fk_team_sponsor FOREIGN KEY (sponsor_id) REFERENCES Sponsor(sponsor_id)
+CREATE OR REPLACE TYPE TeamType AS OBJECT (
+  team_id NUMBER,
+  name VARCHAR2(50),
+  players PlayerListType,
+  sponsors SponsorListType
 );
 
--- Player table
-CREATE TABLE Player (
-  player_id NUMBER PRIMARY KEY,
-  player_name VARCHAR2(50) NOT NULL,
+CREATE OR REPLACE TYPE PlayerType AS OBJECT (
+  player_id NUMBER,
+  first_name VARCHAR2(50),
+  last_name VARCHAR2(50),
   birthdate DATE,
   position VARCHAR2(50),
-  team_id NUMBER,
-  CONSTRAINT fk_player_team FOREIGN KEY (team_id) REFERENCES Team(team_id)
+  team_id REF TeamType
 );
 
--- Match table
-CREATE TABLE Match (
-  match_id NUMBER PRIMARY KEY,
-  match_date DATE,
-  location VARCHAR2(100),
-  team_home_id NUMBER,
-  team_away_id NUMBER,
-  score_home NUMBER,
-  score_away NUMBER,
-  CONSTRAINT fk_match_team_home FOREIGN KEY (team_home_id) REFERENCES Team(team_id),
-  CONSTRAINT fk_match_team_away FOREIGN KEY (team_away_id) REFERENCES Team(team_id)
+CREATE OR REPLACE TYPE PlayerStatsType AS OBJECT (
+    stats_id NUMBER,
+    player_id REF PlayerType,
+    match_id REF MatchType,
+    minutes_played NUMBER,
+    two_points_goals NUMBER,
+    assists NUMBER,
+    blocks NUMBER,
+    rebounds NUMBER,
+    three_points_goal NUMBER
 );
 
--- League table
-CREATE TABLE League (
-  league_id NUMBER PRIMARY KEY,
-  league_name VARCHAR2(50) NOT NULL,
-  season VARCHAR2(20),
-  start_date DATE,
-  end_date DATE,
-  organizing_sponsor_id NUMBER,
-  CONSTRAINT fk_league_sponsor FOREIGN KEY (organizing_sponsor_id) REFERENCES Sponsor(sponsor_id)
-);
-
--- Fan table
-CREATE TABLE Fan (
-  fan_id NUMBER PRIMARY KEY,
-  fan_name VARCHAR2(50) NOT NULL,
-  email VARCHAR2(100),
-  favorite_team_id NUMBER,
-  CONSTRAINT fk_fan_team FOREIGN KEY (favorite_team_id) REFERENCES Team(team_id)
-);
-
--- Ticket table
-CREATE TABLE Ticket (
-  ticket_id NUMBER PRIMARY KEY,
+CREATE OR REPLACE TYPE MatchType AS OBJECT (
   match_id NUMBER,
-  fan_id NUMBER,
-  seat_number VARCHAR2(20),
-  purchase_date DATE,
-  CONSTRAINT fk_ticket_match FOREIGN KEY (match_id) REFERENCES Match(match_id),
-  CONSTRAINT fk_ticket_fan FOREIGN KEY (fan_id) REFERENCES Fan(fan_id)
+  match_date DATE,
+  sport_object_id REF SportObjectType,
+  team_home_id REF TeamType,
+  team_away_id REF TeamType,
+  score_home NUMBER,
+  score_away NUMBER
 );
 
--- Sponsor table
-CREATE TABLE Sponsor (
-  sponsor_id NUMBER PRIMARY KEY,
-  sponsor_name VARCHAR2(50) NOT NULL,
-  industry VARCHAR2(50),
+CREATE OR REPLACE TYPE FanType AS OBJECT (
+  fan_id NUMBER,
+  fan_name VARCHAR2(50),
+  email VARCHAR2(100)
+);
+
+CREATE OR REPLACE TYPE TicketType AS OBJECT (
+  ticket_id NUMBER,
+  match_id REF MatchType,
+  fan_id REF FanType,
+  sport_object_id REF SportObjectType,
+  seat NUMBER,
+  sector VARCHAR2(5),
+  purchase_date DATE
+);
+
+CREATE OR REPLACE TYPE SponsorType AS OBJECT (
+  sponsor_id NUMBER,
+  sponsor_name VARCHAR2(50),
+  team_id REF TeamType,
   sponsorship_amount NUMBER
 );
+
+CREATE OR REPLACE TYPE SportObjectType AS OBJECT (
+  object_id NUMBER,
+  object_name VARCHAR2(50),
+  owner_team_id REF TeamType
+);
+
+CREATE OR REPLACE TYPE PlayerListType AS TABLE OF PlayerType;
+CREATE OR REPLACE TYPE SponsorListType AS TABLE OF SponsorType;
+
+CREATE TABLE Team OF TeamType
+( PRIMARY KEY (team_id))
+NESTED TABLE sponsors STORE AS sponsors_nt,
+NESTED TABLE players STORE AS players_nt;
+
+CREATE TABLE Player OF PlayerType (
+  player_id PRIMARY KEY
+);
+
+CREATE TABLE Match OF MatchType (
+  match_id PRIMARY KEY
+);
+
+CREATE TABLE Fan OF FanType (
+  fan_id PRIMARY KEY
+);
+
+CREATE TABLE Ticket OF TicketType (
+  ticket_id PRIMARY KEY
+);
+
+CREATE TABLE Sponsor OF SponsorType (
+  sponsor_id PRIMARY KEY
+);
+
+CREATE TABLE SportObject OF SportObjectType (
+  object_id PRIMARY KEY
+);
+
+CREATE TABLE PlayerStats OF PlayerStatsType(
+    stats_id PRIMARY KEY
+);
+
+DROP TABLE PlayerStats;
+DROP TABLE SportObject;
+DROP TABLE Sponsor;
+DROP TABLE Ticket;
+DROP TABLE Match;
+DROP TABLE Fan;
+DROP TABLE League;
+DROP TABLE Team;
+DROP TABLE Player;
+
+DROP TYPE SponsorListType FORCE;
+DROP TYPE PlayerListType FORCE;
+
+DROP TYPE TeamType FORCE; 
+DROP TYPE FanType FORCE;
+DROP TYPE PlayerStatsType FORCE;
+DROP TYPE MatchType FORCE;
+DROP TYPE PlayerType FORCE;
+DROP TYPE SponsorType FORCE;
+DROP TYPE TicketType FORCE;
+DROP TYPE SportObjectType FORCE;
+      
