@@ -122,4 +122,4 @@ DROP TYPE PlayerType FORCE;
 DROP TYPE SponsorType FORCE;
 DROP TYPE TicketType FORCE;
 DROP TYPE SportObjectType FORCE;
-      
+    
