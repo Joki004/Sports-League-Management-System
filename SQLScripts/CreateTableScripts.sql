@@ -62,15 +62,31 @@ CREATE OR REPLACE TYPE SponsorType AS OBJECT (
 CREATE OR REPLACE TYPE SportObjectType AS OBJECT (
   object_id NUMBER,
   object_name VARCHAR2(50),
-  owner_team_id REF TeamType
+  owner_team_id REF TeamType,
+  city VARCHAR(50),
+  country VARCHAR(50),
+  seating_capacity NUMBER,
+  sectors SectorListType
+);
+
+CREATE TYPE sectorType AS OBJECT (
+    sector_id NUMBER,
+    sport_object_id REF SportObjectType,
+    sector_name VARCHAR2(50),
+    seat_count NUMBER,
+    sector_type VARCHAR2(50),
+    price_per_seat NUMBER
 );
 
 CREATE OR REPLACE TYPE PlayerListType AS TABLE OF PlayerType;
 CREATE OR REPLACE TYPE SponsorListType AS TABLE OF SponsorType;
+CREATE TYPE SectorListType AS TABLE OF SectorType;
 
 CREATE TABLE Team OF TeamType
-( PRIMARY KEY (team_id))
-NESTED TABLE sponsors STORE AS sponsors_nt,
+( 
+team_id PRIMARY KEY 
+)
+NESTED TABLE sponsors STORE AS sponsors_nt
 NESTED TABLE players STORE AS players_nt;
 
 CREATE TABLE Player OF PlayerType (
@@ -93,9 +109,13 @@ CREATE TABLE Sponsor OF SponsorType (
   sponsor_id PRIMARY KEY
 );
 
+CREATE TABLE Sector OF SectorType (
+    sector_id PRIMARY KEY
+);
+
 CREATE TABLE SportObject OF SportObjectType (
   object_id PRIMARY KEY
-);
+)NESTED TABLE sectors STORE AS sectors_nt;
 
 CREATE TABLE PlayerStats OF PlayerStatsType(
     stats_id PRIMARY KEY
@@ -103,6 +123,7 @@ CREATE TABLE PlayerStats OF PlayerStatsType(
 
 DROP TABLE PlayerStats;
 DROP TABLE SportObject;
+DROP TABLE sector;
 DROP TABLE Sponsor;
 DROP TABLE Ticket;
 DROP TABLE Match;
@@ -113,6 +134,7 @@ DROP TABLE Player;
 
 DROP TYPE SponsorListType FORCE;
 DROP TYPE PlayerListType FORCE;
+DROP TYPE SectorListType FORCE;
 
 DROP TYPE TeamType FORCE; 
 DROP TYPE FanType FORCE;
@@ -122,4 +144,5 @@ DROP TYPE PlayerType FORCE;
 DROP TYPE SponsorType FORCE;
 DROP TYPE TicketType FORCE;
 DROP TYPE SportObjectType FORCE;
-    
+DROP TYPE SectorType FORCE;
+
