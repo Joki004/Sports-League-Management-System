@@ -68,6 +68,7 @@ CREATE OR REPLACE TYPE SportObjectType AS OBJECT (
   seating_capacity NUMBER,
   sectors SectorListType
 );
+
 CREATE TYPE sectorType AS OBJECT (
     sector_id NUMBER,
     sport_object_id REF SportObjectType,
@@ -145,4 +146,3 @@ DROP TYPE TicketType FORCE;
 DROP TYPE SportObjectType FORCE;
 DROP TYPE SectorType FORCE;
 
-      
