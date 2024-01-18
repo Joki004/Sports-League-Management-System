@@ -1,5 +1,5 @@
 --------------------------------------------------------
---  File created - czwartek-stycznia-18-2024   
+
 --------------------------------------------------------
 --------------------------------------------------------
 --  DDL for Package SCHEDULE_PACKAGE
@@ -28,6 +28,7 @@
         team_home_name VARCHAR2
         )RETURN DATE;
     
+
 END SCHEDULE_PACKAGE;
 
 /

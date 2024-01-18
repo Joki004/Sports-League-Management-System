@@ -1,5 +1,5 @@
 --------------------------------------------------------
---  File created - czwartek-stycznia-18-2024   
+
 --------------------------------------------------------
 --------------------------------------------------------
 --  DDL for Package Body SCHEDULE_PACKAGE
@@ -66,6 +66,7 @@
         v_team_away REF TeamType;
         v_object_sport REF SportObjectType;
 
+
     BEGIN
         OPEN SCHEDULE FOR
         SELECT A.name AS team_a_name, B.name AS team_b_name
@@ -116,6 +117,7 @@
             END IF;
         END LOOP;
     END FIND_DATA_FOR_MATCH;
+
 END SCHEDULE_PACKAGE;
 
 /
