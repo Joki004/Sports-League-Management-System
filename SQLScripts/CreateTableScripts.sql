@@ -1,6 +1,9 @@
 CREATE OR REPLACE TYPE TeamType AS OBJECT (
   team_id NUMBER,
   name VARCHAR2(50),
+  wins NUMBER,
+  loses NUMBER,
+  
   players PlayerListType,
   sponsors SponsorListType
 );
