@@ -3,7 +3,9 @@ CREATE OR REPLACE TYPE TeamType AS OBJECT (
   name VARCHAR2(50),
   wins NUMBER,
   loses NUMBER,
-  
+  win_percentage NUMBER,
+  points_conceded NUMBER,
+  points_scored NUMBER,
   players PlayerListType,
   sponsors SponsorListType
 );
@@ -81,8 +83,8 @@ CREATE TYPE sectorType AS OBJECT (
     price_per_seat NUMBER
 );
 
-CREATE OR REPLACE TYPE PlayerListType AS TABLE OF PlayerType;
-CREATE OR REPLACE TYPE SponsorListType AS TABLE OF SponsorType;
+CREATE OR REPLACE TYPE PlayerListType AS TABLE OF REF PlayerType;
+CREATE OR REPLACE TYPE SponsorListType AS TABLE OF REF SponsorType;
 CREATE TYPE SectorListType AS TABLE OF SectorType;
 
 CREATE TABLE Team OF TeamType
