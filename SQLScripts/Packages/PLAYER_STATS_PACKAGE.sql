@@ -1,33 +1,47 @@
-create or replace PACKAGE         "PLAYER_PACKAGE" AS 
+--------------------------------------------------------
+--  File created - pi¹tek-stycznia-19-2024   
+--------------------------------------------------------
+--------------------------------------------------------
+--  DDL for Package PLAYER_STATS_PACKAGE
+--------------------------------------------------------
 
-    PROCEDURE TRANSFER_PLAYER(
-        id_player NUMBER,
-        new_team_id NUMBER
+  CREATE OR REPLACE EDITIONABLE PACKAGE "SCOTT"."PLAYER_STATS_PACKAGE" AS
+    PROCEDURE update_player_stats (
+        s_stats_id NUMBER,
+        p_minutes_played    NUMBER,
+        p_two_points_goals  NUMBER,
+        p_assists           NUMBER,
+        p_blocks            NUMBER,
+        p_rebounds          NUMBER,
+        p_three_points_goal NUMBER
     );
 
-    FUNCTION CHECK_IF_PLAYER_EXISTS(
-        checked_player_id NUMBER
-    )RETURN BOOLEAN;
-
-    PROCEDURE ADD_PLAYER(
-        player_datebirth DATE,
-        player_first_name VARCHAR2,
-        player_last_name VARCHAR2,
-        player_position VARCHAR2,
-        player_team_id NUMBER
+    PROCEDURE add_player_stats (
+        p_match_id          NUMBER,
+        p_player_id         NUMBER,
+        p_minutes_played    NUMBER,
+        p_two_points_goals  NUMBER,
+        p_assists           NUMBER,
+        p_blocks            NUMBER,
+        p_rebounds          NUMBER,
+        p_three_points_goal NUMBER
     );
 
-    PROCEDURE REMOVE_PLAYER_FROM_TEAM(
-        id_player NUMBER
+    PROCEDURE remove_player_stats (
+        p_match_id  NUMBER,
+        p_player_id NUMBER
     );
 
-    PROCEDURE PRINT_PLAYERS_FROM_TEAM(
-        id_team NUMBER
+
+    PROCEDURE display_player_stats (
+        p_player_id NUMBER
     );
+    
+    PROCEDURE display_all_player_stats;
+    
+    PROCEDURE display_all_player_stats_from_match(
+        m_match_id NUMBER);
 
-    FUNCTION CHECK_IF_TEAM_IS_FULL(
-        id_team NUMBER
-    )RETURN BOOLEAN;
+END player_stats_package;
 
-
-END PLAYER_PACKAGE;
+/

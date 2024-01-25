@@ -1,5 +1,5 @@
 --------------------------------------------------------
-
+--  File created - pi¹tek-stycznia-19-2024   
 --------------------------------------------------------
 --------------------------------------------------------
 --  DDL for Package SCHEDULE_PACKAGE
@@ -7,7 +7,9 @@
 
   CREATE OR REPLACE EDITIONABLE PACKAGE "SCOTT"."SCHEDULE_PACKAGE" AS 
 
-    PROCEDURE GENERATE_SCHEDULE;
+    PROCEDURE GENERATE_SCHEDULE(
+        start_season_date DATE
+    );
     PROCEDURE ADD_MATCH(
         team_home REF TeamType,
         team_away REF TeamType,
@@ -25,10 +27,15 @@
     
     FUNCTION FIND_DATA_FOR_MATCH(
         team_away_name VARCHAR2,
-        team_home_name VARCHAR2
+        team_home_name VARCHAR2,
+        start_season_date DATE
         )RETURN DATE;
     
-
+    PROCEDURE PRINT_SCHEDULE;
+    PROCEDURE PRINT_MATCHES_FOR_TEAM(
+        v_team_id NUMBER
+    );
+    
 END SCHEDULE_PACKAGE;
 
 /

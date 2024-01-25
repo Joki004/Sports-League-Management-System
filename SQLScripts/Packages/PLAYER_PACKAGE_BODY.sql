@@ -1,5 +1,5 @@
 --------------------------------------------------------
---  File created - czwartek-stycznia-18-2024   
+--  File created - pi¹tek-stycznia-19-2024   
 --------------------------------------------------------
 --------------------------------------------------------
 --  DDL for Package Body PLAYER_PACKAGE
@@ -115,7 +115,7 @@
             RETURN;
         END IF;
         
-        IF CHECK_IF_TEAM_IS_FULL(player_team_id) = TRUE THEN
+        IF TEAM_PACKAGE.CHECK_IF_TEAM_IS_FULL(player_team_id) = TRUE THEN
             DBMS_OUTPUT.PUT_LINE('Team have too many players!');
             RETURN;
         END IF;
@@ -145,21 +145,28 @@
         DBMS_OUTPUT.PUT_LINE('Successfully added new player: ' || player_first_name || ' ' || player_last_name);
     END ADD_PLAYER;
     
-    --TA FUNKCJA
-    --MUSI WYWALAC TEZ Z TEAMU - PLAYERS
-    --I SPRAWDZAC CZY GRACZ JEST W DRUZYNIE
     PROCEDURE REMOVE_PLAYER_FROM_TEAM(
         id_player NUMBER
     )
     AS
         old_team REF TeamType;
         old_team_name VARCHAR2(50);
+        old_team_id NUMBER;
         player_first_name VARCHAR2(50);
         player_last_name VARCHAR2(50);
+        player_list PlayerListType;
+        choosen_player_id NUMBER;
     BEGIN
     
         IF CHECK_IF_PLAYER_EXISTS(id_player) = FALSE THEN
             DBMS_OUTPUT.PUT_LINE('Player does not exists');
+            RETURN;
+        END IF;
+        
+        SELECT p.TEAM_ID INTO old_team FROM Player p where p.Player_id = id_player;
+        
+        IF old_team IS NULL THEN
+            DBMS_OUTPUT.PUT_LINE('This player is already a free player!');
             RETURN;
         END IF;
     
@@ -167,48 +174,27 @@
         SET p.TEAM_ID = NULL
         WHERE p.PLAYER_ID = id_player;
         
+        UPDATE TEAM t
+        SET t.players = player_list
+        WHERE t.team_id = old_team_id;
+        
         SELECT p.FIRST_NAME INTO player_first_name FROM Player p WHERE p.player_id = id_player;
         SELECT p.LAST_NAME INTO player_last_name FROM Player p WHERE p.player_id = id_player;
-        
-        SELECT p.TEAM_ID INTO old_team FROM Player p where p.Player_id = id_player;
         SELECT t.name INTO old_team_name FROM Team t WHERE REF(t) = old_team;
+        SELECT t.team_id INTO old_team_id FROM Team t WHERE REF(t) = old_team;
+        
+        SELECT t.players INTO player_list FROM Team t where t.team_id = old_team_id;
+        FOR i IN 1..player_list.COUNT LOOP
+            SELECT p.player_id INTO choosen_player_id FROM Player p WHERE REF(p) = player_list(i);
+            IF choosen_player_id = id_player THEN
+                player_list.DELETE(i);
+                EXIT;
+            END IF;
+        END LOOP;
         
         DBMS_OUTPUT.PUT_LINE('Succesfully removed player: ' || player_first_name || ' ' || player_last_name || ' from team: ' || old_team_name);
         
     END REMOVE_PLAYER_FROM_TEAM;
-    
-    PROCEDURE PRINT_PLAYERS_FROM_TEAM(
-        id_team NUMBER
-    )
-    AS
-        player_list PlayerListType;
-        choosen_player REF PlayerType;
-        player_f_name VARCHAR2(50);
-        player_l_name VARCHAR2(50);
-    BEGIN
-        SELECT t.players INTO player_list FROM Team t WHERE t.team_id = id_team;
-        
-        FOR i IN 1..player_list.COUNT LOOP
-            choosen_player := player_list(i);
-            SELECT p.first_name INTO player_f_name FROM Player p WHERE REF(p) = choosen_player;
-            SELECT p.last_name INTO player_l_name FROM Player p WHERE REF(p) = choosen_player;
-            DBMS_OUTPUT.PUT_LINE('Player ' || i || ': ' || player_f_name|| ' ' || player_l_name);
-        END LOOP;
-    END PRINT_PLAYERS_FROM_TEAM;
-    
-    FUNCTION CHECK_IF_TEAM_IS_FULL(
-        id_team NUMBER
-    )RETURN BOOLEAN
-    AS
-        player_list PlayerListType;
-    BEGIN
-        SELECT t.players INTO player_list FROM Team t WHERE t.team_id = id_team;
-        IF player_list.COUNT <= 14 THEN
-            RETURN FALSE;
-        ELSE
-            RETURN TRUE;
-        END IF;
-    END CHECK_IF_TEAM_IS_FULL;
 END PLAYER_PACKAGE;
 
 /

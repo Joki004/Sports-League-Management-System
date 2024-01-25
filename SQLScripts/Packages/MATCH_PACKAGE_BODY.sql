@@ -1,4 +1,11 @@
-CREATE OR REPLACE PACKAGE BODY match_package AS
+--------------------------------------------------------
+--  File created - pi¹tek-stycznia-19-2024   
+--------------------------------------------------------
+--------------------------------------------------------
+--  DDL for Package Body MATCH_PACKAGE
+--------------------------------------------------------
+
+  CREATE OR REPLACE EDITIONABLE PACKAGE BODY "SCOTT"."MATCH_PACKAGE" AS
 
     PROCEDURE update_team_ranking AS
 
@@ -23,7 +30,7 @@ CREATE OR REPLACE PACKAGE BODY match_package AS
                 v_wins,
                 v_loses;
             EXIT WHEN team_cursor%notfound;
-    
+
       -- Calculate win percentage
             v_win_percentage := round(
                                      CASE
@@ -253,10 +260,19 @@ CREATE OR REPLACE PACKAGE BODY match_package AS
         v_score_away NUMBER;
         v_arena      VARCHAR2(50);
         v_date       DATE;
+        v_team_home REF TeamType;
+        v_team_away REF TeamType;
+        v_player REF PlayerType;
+        v_player_id NUMBER;
+        v_player_home_list PlayerListType;
+        v_player_away_list PlayerListType;
     BEGIN
         SELECT
-            m.match_date
-        INTO v_date
+            m.match_date,
+            deref(m.sport_object_id).object_name
+        INTO
+            v_date,
+            v_arena
         FROM
             match m
         WHERE
@@ -271,7 +287,28 @@ CREATE OR REPLACE PACKAGE BODY match_package AS
             m.score_away = p_score_away
         WHERE
             m.match_id = m_match_id;
+            
+        SELECT TEAM_HOME_ID, TEAM_AWAY_ID INTO v_team_home, v_team_away FROM MATCH WHERE MATCH_ID = m_match_id;
+        SELECT t.players INTO v_player_home_list FROM Team t where REF(t) = v_team_home;
+        FOR i IN 1..v_player_home_list.COUNT LOOP
+            v_player := v_player_home_list(i);
+            SELECT p.player_id INTO v_player_id FROM PLAYER p WHERE REF(p) = v_player;
+            PLAYER_STATS_PACKAGE.add_player_stats(m_match_id, v_player_id, 0, 0, 0, 0, 0, 0);
+        END LOOP;
+        
+        SELECT t.players INTO v_player_away_list FROM Team t where REF(t) = v_team_away;
+        FOR i IN 1..v_player_away_list.COUNT LOOP
+            v_player := v_player_away_list(i);
+            SELECT p.player_id INTO v_player_id FROM PLAYER p WHERE REF(p) = v_player;
+            PLAYER_STATS_PACKAGE.add_player_stats(m_match_id, v_player_id, 0, 0, 0, 0, 0, 0);
+        END LOOP;
 
+        update_team_stats(v_date, v_arena);
+        EXCEPTION
+            WHEN OTHERS THEN
+            -- Handle exceptions as needed
+                dbms_output.put_line('An error occurred: ' || sqlerrm);
+    
     END update_score_with_match_id;
 
     PROCEDURE update_score_with_teams (
@@ -295,8 +332,8 @@ CREATE OR REPLACE PACKAGE BODY match_package AS
 
     END update_score_with_teams;
 
-    FUNCTION display_team_ranking RETURN SYS_REFCURSOR IS
-
+    PROCEDURE display_team_ranking
+    AS
         team_cursor      SYS_REFCURSOR;
         rankingcursor    SYS_REFCURSOR;
         v_team_id        NUMBER;
@@ -306,32 +343,32 @@ CREATE OR REPLACE PACKAGE BODY match_package AS
         v_loses          NUMBER;
         v_win_percentage NUMBER;
     BEGIN
+        update_team_ranking();
   -- Open a cursor to fetch team data ordered by win percentage
         OPEN team_cursor FOR SELECT
-                                                                      team_id,
-                                                                      name,
-                                                                      wins,
-                                                                      loses,
-                                                                      win_percentage
-                                                                  FROM
-                                                                      (
-                                                                          SELECT
-                                                                              team_id,
-                                                                              name,
-                                                                              wins,
-                                                                              loses,
-                                                                              win_percentage,
-                                                                              RANK()
-                                                                              OVER(
-                                                                                  ORDER BY
-                                                                                      wins DESC, win_percentage DESC
-                                                                              ) AS team_rank
-                                                                          FROM
-                                                                              team
-                                                                      )
-                                     ORDER BY
-                                         team_rank ASC;
-
+                                                      team_id,
+                                                      name,
+                                                      wins,
+                                                      loses,
+                                                      win_percentage
+                                                  FROM
+                                                      (
+                                                          SELECT
+                                                              team_id,
+                                                              name,
+                                                              wins,
+                                                              loses,
+                                                              win_percentage,
+                                                              RANK()
+                                                              OVER(
+                                                                  ORDER BY
+                                                                      wins DESC, win_percentage DESC
+                                                              ) AS team_rank
+                                                          FROM
+                                                              team
+                                                      )
+                             ORDER BY
+                                 team_rank ASC;
 
         rankingcursor := team_cursor;
         dbms_output.put_line('-------------------------------------------------------------------');
@@ -362,8 +399,6 @@ CREATE OR REPLACE PACKAGE BODY match_package AS
 
   -- Close the cursor
         CLOSE rankingcursor;
-  -- Return the cursor
-        RETURN team_cursor;
     END display_team_ranking;
 
     FUNCTION get_match_id (
@@ -393,3 +428,5 @@ CREATE OR REPLACE PACKAGE BODY match_package AS
     END get_match_id;
 
 END match_package;
+
+/

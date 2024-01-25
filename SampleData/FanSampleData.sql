@@ -35,7 +35,7 @@ VALUES( fan_id_seq.NEXTVAL,
     );
 
 
--- Inserting 20 fans using the sequence for FAN_ID
+
 INSERT INTO FAN(FAN_ID, FAN_NAME, EMAIL)
 SELECT
   fan_id_seq.NEXTVAL,

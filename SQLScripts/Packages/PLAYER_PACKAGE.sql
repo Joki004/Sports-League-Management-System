@@ -1,5 +1,5 @@
 --------------------------------------------------------
---  File created - czwartek-stycznia-18-2024   
+--  File created - pi¹tek-stycznia-19-2024   
 --------------------------------------------------------
 --------------------------------------------------------
 --  DDL for Package PLAYER_PACKAGE
@@ -26,17 +26,7 @@
     
     PROCEDURE REMOVE_PLAYER_FROM_TEAM(
         id_player NUMBER
-    );
-    
-    PROCEDURE PRINT_PLAYERS_FROM_TEAM(
-        id_team NUMBER
-    );
-    
-    FUNCTION CHECK_IF_TEAM_IS_FULL(
-        id_team NUMBER
-    )RETURN BOOLEAN;
-    
-
+    );    
 END PLAYER_PACKAGE;
 
 /

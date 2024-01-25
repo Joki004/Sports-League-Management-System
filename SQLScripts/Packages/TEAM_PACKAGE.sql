@@ -1,5 +1,5 @@
 --------------------------------------------------------
---  File created - czwartek-stycznia-18-2024   
+--  File created - pi¹tek-stycznia-19-2024   
 --------------------------------------------------------
 --------------------------------------------------------
 --  DDL for Package TEAM_PACKAGE
@@ -42,9 +42,22 @@
         id_team NUMBER
     );
     
+    PROCEDURE PRINT_PLAYERS_FROM_TEAM(
+        id_team NUMBER
+    );
+    
     PROCEDURE PRINT_SPONSORS_FROM_TEAM(
         id_team NUMBER
     );
+    
+    PROCEDURE ADD_SPORT_OBJECT(
+        sport_object_name VARCHAR2,
+        owner_team_id NUMBER
+    );
+    
+    FUNCTION CHECK_IF_TEAM_IS_FULL(
+        id_team NUMBER
+    )RETURN BOOLEAN;
 
 END TEAM_PACKAGE;
 

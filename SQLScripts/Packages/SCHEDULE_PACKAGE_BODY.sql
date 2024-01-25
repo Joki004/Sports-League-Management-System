@@ -1,5 +1,5 @@
 --------------------------------------------------------
-
+--  File created - pi¹tek-stycznia-19-2024   
 --------------------------------------------------------
 --------------------------------------------------------
 --  DDL for Package Body SCHEDULE_PACKAGE
@@ -14,8 +14,8 @@
         match_count NUMBER;
         rng_date DATE;
     BEGIN
-        SELECT COUNT(*) INTO match_count 
-        FROM MATCH t WHERE t.MATCH_DATE = date_match;
+        SELECT COUNT(*) INTO MATCH_COUNT FROM MATCH t
+        WHERE t.MATCH_DATE = date_match;
         
         IF match_count = 0 THEN
             RETURN FALSE;
@@ -33,6 +33,7 @@
         sport_object REF SportObjectType)
     AS
     BEGIN
+    
         INSERT INTO MATCH(MATCH_ID, MATCH_DATE, SPORT_OBJECT_ID, TEAM_HOME_ID, TEAM_AWAY_ID, SCORE_HOME, SCORE_AWAY)
         VALUES(MATCH_ID_SEQ.NEXTVAL, match_date, sport_object, team_home, team_away, 0, 0);
     END ADD_MATCH;
@@ -45,9 +46,11 @@
         last_match_date DATE;
         time_difference NUMBER;
     BEGIN
-        SELECT MAX(MATCH_DATE) INTO last_match_date FROM MATCH t
-        WHERE t.team_home_id = (SELECT REF(t) FROM Team t WHERE t.NAME = team_name)
-        OR t.team_away_id = (SELECT REF(t) FROM Team t WHERE t.NAME = team_name);
+        SELECT (MAX(p.MATCH_DATE)) INTO last_match_date
+        FROM MATCH p
+        WHERE p.team_home_id = (SELECT REF(t) FROM Team t WHERE t.NAME = team_name)
+           OR p.team_away_id = (SELECT REF(t) FROM Team t WHERE t.NAME = team_name);
+        
         IF last_match_date IS NULL THEN
             RETURN TRUE;
         ELSE
@@ -56,16 +59,17 @@
         END IF;
     END CHECK_IF_READY_FOR_NEXT_MATCH;
 
-    PROCEDURE GENERATE_SCHEDULE
+    PROCEDURE GENERATE_SCHEDULE(
+        start_season_date DATE
+    )
     AS
         v_team_home_name VARCHAR2(50);
         v_team_away_name VARCHAR2(50);
-        v_match_date DATE := TO_DATE('24-10-2023 12:00:00', 'DD-MM-YYYY HH24:MI:SS');
+        v_match_date DATE;
         SCHEDULE SYS_REFCURSOR;
         v_team_home REF TeamType;
         v_team_away REF TeamType;
         v_object_sport REF SportObjectType;
-
 
     BEGIN
         OPEN SCHEDULE FOR
@@ -84,8 +88,7 @@
             SELECT REF(t) INTO v_object_sport FROM SportObject t WHERE t.OWNER_TEAM_ID = v_team_home;
             
             
-            v_match_date := FIND_DATA_FOR_MATCH(v_team_home_name, v_team_away_name);
-            DBMS_OUTPUT.PUT_LINE('ZWROCILO DATE: ' || TO_CHAR(v_match_date, 'DD-MM-YYYY HH24:MI:SS'));
+            v_match_date := FIND_DATA_FOR_MATCH(v_team_home_name, v_team_away_name, start_season_date);
             ADD_MATCH(v_team_home, v_team_away, v_match_date, v_object_sport);
         END LOOP;
         CLOSE SCHEDULE;
@@ -93,12 +96,13 @@
 
     FUNCTION FIND_DATA_FOR_MATCH(
         team_away_name VARCHAR2,
-        team_home_name VARCHAR2
+        team_home_name VARCHAR2,
+        start_season_date DATE
     )RETURN DATE
     AS
         found_date BOOLEAN := false;
         v_hour NUMBER;
-        start_date DATE := TO_DATE('24-10-2023 12:00:00', 'DD-MM-YYYY HH24:MI:SS');
+        start_date DATE := start_season_date;
     BEGIN
         WHILE TRUE LOOP
             EXIT WHEN found_date = TRUE;
@@ -117,7 +121,80 @@
             END IF;
         END LOOP;
     END FIND_DATA_FOR_MATCH;
+    
+    PROCEDURE PRINT_SCHEDULE
+    AS
+        SCHEDULE SYS_REFCURSOR;
+        team_home_name VARCHAR2(50);
+        team_away_name VARCHAR2(50);
+        sport_object_name VARCHAR2(50);
+        v_match_date DATE;
+        v_score_away NUMBER;
+        v_score_home NUMBER;
+    BEGIN
+        OPEN SCHEDULE FOR
+            SELECT 
+                m.match_date,
+                DEREF(m.team_home_id).name,
+                DEREF(m.team_away_id).name,
+                DEREF(m.sport_object_id).object_name,
+                score_home,
+                score_away
+            FROM match m; 
 
+        LOOP
+            FETCH SCHEDULE INTO v_match_date, team_home_name, team_away_name, sport_object_name, v_score_away, v_score_home;
+            EXIT WHEN SCHEDULE%NOTFOUND;
+            
+            IF v_score_home = 0 AND v_score_away = 0 THEN
+                DBMS_OUTPUT.PUT_LINE(TO_CHAR(v_match_date, 'DD-MM-YYYY HH24:MI:SS') || ' | ' || team_home_name || ' vs ' || team_away_name || ' | ' || sport_object_name || ' | MATCH NOT PLAYED YET');
+            ELSE
+                DBMS_OUTPUT.PUT_LINE(TO_CHAR(v_match_date, 'DD-MM-YYYY HH24:MI:SS') || ' | ' || team_home_name || ' vs ' || team_away_name || ' | ' || v_score_home || ' : ' || v_score_away);
+            END IF;
+            
+        END LOOP;
+        CLOSE SCHEDULE;
+    END PRINT_SCHEDULE;
+    
+    PROCEDURE PRINT_MATCHES_FOR_TEAM(
+        v_team_id NUMBER
+    )AS
+        SCHEDULE SYS_REFCURSOR;
+        team_home_name VARCHAR2(50);
+        team_away_name VARCHAR2(50);
+        sport_object_name VARCHAR2(50);
+        v_match_date DATE;
+        v_team_ref REF TeamType;
+        v_score_away NUMBER;
+        v_score_home NUMBER;
+    BEGIN
+        SELECT REF(t) INTO v_team_ref FROM Team t where t.team_id = v_team_id;
+        
+        OPEN SCHEDULE FOR
+            SELECT 
+                m.match_date,
+                DEREF(m.team_home_id).name,
+                DEREF(m.team_away_id).name,
+                DEREF(m.sport_object_id).object_name,
+                score_home, 
+                score_away
+            FROM match m
+            where m.team_home_id = v_team_ref
+            OR m.team_away_id = v_team_ref; 
+
+        LOOP
+            FETCH SCHEDULE INTO v_match_date, team_home_name, team_away_name, sport_object_name, v_score_away, v_score_home;
+            EXIT WHEN SCHEDULE%NOTFOUND;
+            
+            IF v_score_home = 0 AND v_score_away = 0 THEN
+                DBMS_OUTPUT.PUT_LINE(TO_CHAR(v_match_date, 'DD-MM-YYYY HH24:MI:SS') || ' | ' || team_home_name || ' vs ' || team_away_name || ' | ' || sport_object_name || ' | MATCH NOT PLAYED YET');
+            ELSE
+                DBMS_OUTPUT.PUT_LINE(TO_CHAR(v_match_date, 'DD-MM-YYYY HH24:MI:SS') || ' | ' || team_home_name || ' vs ' || team_away_name || ' | ' || v_score_home || ' : ' || v_score_away);
+            END IF;
+                        
+        END LOOP;
+        CLOSE SCHEDULE;
+    END PRINT_MATCHES_FOR_TEAM;
 END SCHEDULE_PACKAGE;
 
 /

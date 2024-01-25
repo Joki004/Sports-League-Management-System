@@ -55,10 +55,15 @@ SELECT
                 m.match_date = TO_DATE('2023-10-24 12:00:00', 'YYYY-MM-DD HH24:MI:SS')
             AND s.object_name = 'Little Caesars Arena';
 SELECT
-    TO_CHAR(m.match_date, 'YYYY-MM-DD HH24:MI:SS') AS formatted_date,m.score_home
+    TO_CHAR(m.match_date, 'YYYY-MM-DD HH24:MI:SS') AS formatted_date,DEREF(m.team_home_id).name,DEREF(m.team_away_id).name,DEREF(m.sport_object_id).object_name
 FROM
-    match m;
-
+    match m
+where DEREF(m.team_home_id).name = 'DETROIT PISTONS';
+SELECT
+    TO_CHAR(m.match_date, 'YYYY-MM-DD HH24:MI:SS') AS formatted_date,DEREF(m.team_home_id).name,DEREF(m.team_away_id).name,DEREF(m.sport_object_id).object_name
+FROM
+    match m
+where DEREF(m.team_away_id).name = 'DETROIT PISTONS';
  SELECT DISTINCT t.wins,
  t.name,
            t.loses,
